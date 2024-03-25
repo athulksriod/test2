@@ -24,12 +24,11 @@ app.use(bodyParser.json());
 app.use(express.static('public'));
 
 // Handle POST request and store the data in MongoDB
-app.post('/',  (req, res) => {
-   
+app.post('/', (req, res) => {
     try {
         const createEntry = Data.create(req.body);
         console.log('Received and saved new data:', req.body);
-        res.send(${JSON.stringify(req.body, null, 2)});
+        res.send(JSON.stringify(req.body, null, 2)); // Corrected response syntax
     } catch (err) {
         console.error('Error saving data:', err);
         res.status(500).send('Error saving data');
