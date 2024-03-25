@@ -6,7 +6,7 @@ const app = express();
 const PORT = 3000;
 
 // Connect to MongoDB
-mongoose.connect('mongodb://localhost:27017/dataDB', { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect('mongodb+srv://athulksriod:E4zExGpJmLyjIjur@cluster0.xu1dkrf.mongodb.net/', { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('Error connecting to MongoDB:', err));
 
@@ -25,14 +25,14 @@ app.use(express.static('public'));
 
 // Handle POST request and store the data in MongoDB
 app.post('/',  (req, res) => {
-    const newData = new Data({ content: req.body });
+
     try {
-        await newData.save();
+        const createEntry = Data.create(req.body)
         console.log('Received and saved new data:', req.body);
-        res.send(`${JSON.stringify(req.body, null, 2)}`);
+        res.send(${JSON.stringify(req.body, null, 2)});
     } catch (err) {
         console.error('Error saving data:', err);
-        res.status(500).send('Error saving data');
+       //res.status(500).send('Error saving data');
     }
 });
 
