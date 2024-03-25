@@ -8,42 +8,23 @@
 <body>
 
     <h1>Received Data</h1>
-    <table id="dataTable">
-        <!-- Initially, the table is empty -->
-        <thead>
-            <tr>
-                <th>Content</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Table body will be populated dynamically -->
-        </tbody>
-    </table>
+    <div id="myDiv"></div>
 
     <script>
-        var dataTable = document.getElementById("dataTable");
 
-        // Function to update table data
-        function updateTable(data) {
-            // Clear existing table rows
-            dataTable.innerHTML = '<thead><tr><th>Content</th></tr></thead><tbody></tbody>';
+                 var myDiv = document.getElementById("myDiv");
+// Fetch content from an external source
+    fetch('/')
+      .then(response => response.json())
+        
+      .then(data => {
+          var jsonString = JSON.stringify(data);
+        // Set the fetched data as the text content of the div
+        myDiv.textContent = jsonString;
+      })
+      .catch(error => console.error('Error fetching data:', error))
 
-            // Generate table rows
-            data.forEach(item => {
-                var row = dataTable.getElementsByTagName('tbody')[0].insertRow();
-                var cell = row.insertCell();
-                cell.textContent = item.content;
-            });
-        }
 
-        // Fetch content from an external source
-        fetch('/')
-          .then(response => response.json())
-          .then(data => {
-              // Update table with fetched data
-              updateTable(data);
-          })
-          .catch(error => console.error('Error fetching data:', error));
     </script>
 </body>
 </html>
