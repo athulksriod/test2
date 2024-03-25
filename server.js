@@ -38,7 +38,7 @@ app.post('/', (req, res) => {
 // Handle GET request for retrieving the last 10 posted data from MongoDB
 app.get('/', (req, res) => {
     try {
-        const last10Data = await Data.find().sort({ _id: -1 }).limit(10);
+        const last10Data = Data.find().sort({ _id: -1 }).limit(10);
         console.log('Retrieved last 10 data:', last10Data);
         res.json(last10Data.reverse());
     } catch (err) {
