@@ -24,7 +24,7 @@ app.use(bodyParser.json());
 app.use(express.static('public'));
 
 // Handle POST request and store the data in MongoDB
-app.post('/', async (req, res) => {
+app.post('/',  (req, res) => {
     const newData = new Data({ content: req.body });
     try {
         await newData.save();
@@ -37,7 +37,7 @@ app.post('/', async (req, res) => {
 });
 
 // Handle GET request for retrieving the last 10 posted data from MongoDB
-app.get('/lastPostedData', async (req, res) => {
+app.get('/', (req, res) => {
     try {
         const last10Data = await Data.find().sort({ _id: -1 }).limit(10);
         console.log('Retrieved last 10 data:', last10Data);
