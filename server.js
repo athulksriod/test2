@@ -26,7 +26,7 @@ app.use(express.static('public'));
 // Handle POST request and store the data in MongoDB
 app.post('/', async (req, res) => {
     try {
-        let body = req.body; // Assigning req.body directly to body
+        let body = body = {"content:", req.body}; // Assigning req.body directly to body
         const createEntry = await Data.create(body); // Assuming Data.create() is an asynchronous operation
         console.log('Received and saved new data:', body);
         res.send(JSON.stringify(body, null, 2)); // Corrected response syntax
