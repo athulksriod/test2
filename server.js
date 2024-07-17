@@ -1,21 +1,14 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const mongoose = require('mongoose');
+const { google } = require('googleapis');
+const dotenv = require('dotenv');
+
+dotenv.config();
 
 const app = express();
 const PORT = 3000;
 
-// Connect to MongoDB
-mongoose.connect('mongodb+srv://athulksriod:E4zExGpJmLyjIjur@cluster0.xu1dkrf.mongodb.net/',)
-  .then(() => console.log('Connected to MongoDB'))
-  .catch(err => console.error('Error connecting to MongoDB:', err));
-
-// Define schema and model for data
-const dataSchema = new mongoose.Schema({
-    content: String
-});
-
-const Data = mongoose.model('Data', dataSchema);
+let lastPostedData = null; // Variable to store the last posted data
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -23,29 +16,50 @@ app.use(bodyParser.json());
 // Serve the HTML page
 app.use(express.static('public'));
 
-// Handle POST request and store the data in MongoDB
+// Function to append data to Google Sheets
+async function appendToGoogleSheet(data) {
+    const auth = new google.auth.GoogleAuth({
+        credentials: {
+            client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+            private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+        },
+        scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+    });
+
+    const sheets = google.sheets({ version: 'v4', auth });
+
+    const spreadsheetId = process.env.SPREADSHEET_ID;
+    const range = 'Sheet1!A1'; // Update with your desired sheet name and range
+
+    await sheets.spreadsheets.values.append({
+        spreadsheetId,
+        range,
+        valueInputOption: 'USER_ENTERED',
+        resource: {
+            values: [Object.values(data)],
+        },
+    });
+}
+
+// Handle POST request and store the data
 app.post('/', async (req, res) => {
+    lastPostedData = req.body;
+    console.log('Received POST request:', req.body);
+    
+    // Append to Google Sheets
     try {
-        let body = {"content:", req.body}; // Assigning req.body directly to body
-        const createEntry = await Data.create(body); // Assuming Data.create() is an asynchronous operation
-        console.log('Received and saved new data:', body);
-        res.send(JSON.stringify(body, null, 2)); // Corrected response syntax
-    } catch (err) {
-        console.error('Error saving data:', err);
-        res.status(500).send('Error saving data');
+        await appendToGoogleSheet(req.body);
+        res.send(`${JSON.stringify(lastPostedData, null, 2)}`);
+    } catch (error) {
+        console.error('Error appending to Google Sheet:', error);
+        res.status(500).send('Internal Server Error');
     }
 });
 
-// Handle GET request for retrieving the last 10 posted data from MongoDB
-app.get('/', (req, res) => {
-    try {
-        const last10Data = Data.find().sort({ _id: -1 }).limit(10);
-        console.log('Retrieved last 10 data:', last10Data);
-        res.json(last10Data.reverse());
-    } catch (err) {
-        console.error('Error retrieving data:', err);
-        res.status(500).send('Error retrieving data');
-    }
+// Handle GET request for retrieving the last posted data
+app.get('/lastPostedData', (req, res) => {
+    console.log(lastPostedData);
+    res.json(lastPostedData);
 });
 
 // Start the server
